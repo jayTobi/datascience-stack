@@ -1,0 +1,2 @@
+fluent-logger==0.9.6
+pyyaml==5.4.1

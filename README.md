@@ -114,3 +114,20 @@ A more manual approach that can be found inside the file ```logging/fluentd_test
 The third code inside ```logging/logging_test.py``` just configures standard Python logging without fluentd.
 
 You can just run the Python scripts and check the fluentd log and the Kibana Web UI.
+
+## MLFlow
+MLFlow will be used as a server and a client the first part will focus on the server.
+### MLFlow Tracking Server
+This is the backend server the clients communicate with.
+It will include a database (PostgreSQL in docker-compose) and an (local) artifact store 
+for models and other artifacts.
+
+Multiple clients could connect to the same MLFLow server for tracking experiments, e.g. a team
+could work with the same server to share models or simplify tracking.
+
+In addition to PostgreSQL the docker installs `adminer` a PHP UI to connect to the database.
+
+You can open it using <http://localhost:8080> and connect to the database running inside the docker container using the server `mlflowdatabase:5432`, database `mlflow-postgres` and user/password from the `docker-compose.yml`.
+
+MLFlow provides a UI for browsing experiments and models
+that can be accessed using your browser <http://localhost:5000>.

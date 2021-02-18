@@ -128,6 +128,27 @@ could work with the same server to share models or simplify tracking.
 In addition to PostgreSQL the docker installs `adminer` a PHP UI to connect to the database.
 
 You can open it using <http://localhost:8080> and connect to the database running inside the docker container using the server `mlflowdatabase:5432`, database `mlflow-postgres` and user/password from the `docker-compose.yml`.
+### MLFLow UI
 
 MLFlow provides a UI for browsing experiments and models
 that can be accessed using your browser <http://localhost:5000>.
+### MLFlow client - using MLFLow
+The folder `mlflow` contains examples using MLFlow client APIs to connect and communicate with the MLFLow Tracking Server inside the Docker container. (Make sure you have installed inside your Python environment, e.g. using the requirements.txt in this repo)
+
+For using a remote tracking server you have to configure:
+- Set the remote tracking url - using the API or **environment variables if you run multi-step workflows!**
+- Use a drive/storage that is accessible under the same name inside the remote server and the machine your running your experiment 
+  - Normally this would be some kind of cloud storage (e.g. AWS S3) or a shared network folder
+  - For the local docker example inside this repo a simple symbolic link will suffice
+    - Find the location where Docker stores the data inside the Docker volume with 
+      - ```docker volume ls```: list all volumes. Look for the one ending with `mlflow-data` and inspect it using
+      - ``` docker volume inspect datascience-stack_mlflow-data```: The JSON output of this command contains the required key "Mountpoint". Copy its value and create a symbolic link
+      - `sudo ln -s /var/lib/docker/volumes/datascience-stack_mlflow-data/_data/artifactStore/ /opt/mlflow/artifactStore`: Make sure to use the same folder name inside the docker and the host.
+      In the Dockerfile we specified it as `/opt/mlflow/artifactStore`
+
+After mounting the folder you can simply run `mlflow/simple.py` then open up the MLFlow UI and you should find a new experiment `my-simple-experiment` with some metrics. After clicking on a run you can find more details and you **should ensure** that the artifacts were saved correctly by scrolling down the page and click on `test.txt` under the Artifacts section.
+
+### MLFlow basics and concepts
+To get a better understanding of the underlying ideas and terminology of MLFLow and how to use it have a look at the following pages:
+- <https://www.mlflow.org/docs/latest/quickstart.html>
+- <https://www.mlflow.org/docs/latest/concepts.html>

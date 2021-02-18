@@ -174,4 +174,5 @@ This tutorial will take you through small parts taken from the official tutorial
   - extract them into data folder
 - Add the data folder using DVC instead of git `dvc add data`
   - Follow the instruction to add the dvc metadata to git using `git add data.dvc .gitignore`
-    - This prevents git from tracking the raw data but only the "references" managed by DVC 
+    - This prevents git from tracking the raw data but only the "references" managed by DVC
+- A small test script was added `dvc_python_test/train.py` to test the dataset (i.e. count the elements to indicate the change of size in the raw data)

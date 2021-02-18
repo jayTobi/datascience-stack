@@ -169,3 +169,9 @@ This tutorial will take you through small parts taken from the official tutorial
   - This will add some new files/folders all containing .dvc* in their names 
   - These files contain metadata and will be used by DVC to keep track of the data we add in the next step
   - Add those files to git
+- Get example data using ```dvc get https://github.com/iterative/dataset-registry tutorial/ver/data.zip```
+  - This will download some example data (cat/dog pics)
+  - extract them into data folder
+- Add the data folder using DVC instead of git `dvc add data`
+  - Follow the instruction to add the dvc metadata to git using `git add data.dvc .gitignore`
+    - This prevents git from tracking the raw data but only the "references" managed by DVC 

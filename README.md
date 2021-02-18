@@ -158,8 +158,7 @@ To get a better understanding of the underlying ideas and terminology of MLFLow 
 > Data Version Control, or DVC, is a data and ML experiment management tool that takes advantage of the existing engineering toolset that you're already familiar with (Git, CI/CD, etc.). 
 > -- <cite><https://dvc.org/doc></cite>
 
-Although DVC is much more as a simple data versioning tool
-this tutorial will use it for exactly that. Other aspects like tracking experiments, metrics and models will be done by MLFlow as described above.
+Although DVC is much more than a simple data versioning tool this tutorial will use it for exactly that. Other aspects like tracking experiments, metrics and models will be done by MLFlow as described above.
 
 This tutorial will take you through small parts taken from the official tutorials (<https://dvc.org/doc/use-cases/versioning-data-and-model-files/tutorial>).
 

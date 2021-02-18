@@ -152,3 +152,20 @@ After mounting the folder you can simply run `mlflow/simple.py` then open up the
 To get a better understanding of the underlying ideas and terminology of MLFLow and how to use it have a look at the following pages:
 - <https://www.mlflow.org/docs/latest/quickstart.html>
 - <https://www.mlflow.org/docs/latest/concepts.html>
+
+## DVC - Data Version Control
+
+> Data Version Control, or DVC, is a data and ML experiment management tool that takes advantage of the existing engineering toolset that you're already familiar with (Git, CI/CD, etc.). 
+> -- <cite><https://dvc.org/doc></cite>
+
+Although DVC is much more as a simple data versioning tool
+this tutorial will use it for exactly that. Other aspects like tracking experiments, metrics and models will be done by MLFlow as described above.
+
+This tutorial will take you through small parts taken from the official tutorials (<https://dvc.org/doc/use-cases/versioning-data-and-model-files/tutorial>).
+
+- Make sure you have DVC installed
+ (<https://dvc.org/doc/install>)
+- Run `dvc init` (only required on new git repositories, already done in this tutorial)
+  - This will add some new files/folders all containing .dvc* in their names 
+  - These files contain metadata and will be used by DVC to keep track of the data we add in the next step
+  - Add those files to git

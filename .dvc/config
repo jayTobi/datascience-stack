@@ -1,0 +1,4 @@
+[core]
+    remote = iterative-reg
+['remote "iterative-reg"']
+    url = https://github.com/iterative/dataset-registry

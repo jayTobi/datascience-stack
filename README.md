@@ -168,13 +168,13 @@ This tutorial will take you through small parts taken from the official tutorial
 - Run `dvc init` (only required on new git repositories, already done in this tutorial)
   - This will add some new files/folders all containing .dvc* in their names 
   - These files contain metadata and will be used by DVC to keep track of the data we add in the next step
-  - Add those files to git
+  - Add all those files to git
 - Get example data using ```dvc get https://github.com/iterative/dataset-registry tutorial/ver/data.zip```
   - This will download some example data (1800 cat/dog pics)
-  - extract them into `data` folder and delete downloaded zip file
+  - Extract the download into `data` folder and delete downloaded zip file
 - Add the data folder using DVC instead of git `dvc add data`
   - Follow the instruction (of dvc add data) to add the dvc metadata to git using `git add data.dvc .gitignore`
-    - This prevents git from tracking the raw data but only the "references" managed by DVC
+    - This prevents git from tracking the raw data but tracks only the "references" managed by DVC
 - A small test script was added `dvc_python_test/train.py` to test the dataset (i.e. count the elements to indicate the change of size in the raw data)
 - Add additional raw data using
   - `dvc get https://github.com/iterative/dataset-registry 
@@ -183,3 +183,13 @@ This tutorial will take you through small parts taken from the official tutorial
     - Running `dvc_python_test/train.py` will now also output 2800 elements instead of 1800
   - Running `dvc add data` again will add the additional raw data and update the DVC internal metadata
     - Another `git status` will indicate that by showing that only `data.dvc` was modified
+- Normally you would specify a remote storage where the data is located, e.g. AWS S3
+  - In this example it was added by pointing to the sample data `dvc remote add -d iterative-reg https://github.com/iterative/dataset-registry`
+- You can now try to get the most recent version of the data (or the version from the commit before) by deleting the contents of the data directory and running `dvc pull`
+  - depending on the version (an actual git commit) you use you will end up with either 1800 or 2800 pictures (verify it by executing the python script)
+
+
+For more details on DVC have a look at the great tutorials:
+- <https://dvc.org/doc/start>
+- <https://dvc.org/doc/start/data-versioning>
+- <https://dvc.org/doc/user-guide/what-is-dvc>

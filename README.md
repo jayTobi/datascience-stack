@@ -170,9 +170,16 @@ This tutorial will take you through small parts taken from the official tutorial
   - These files contain metadata and will be used by DVC to keep track of the data we add in the next step
   - Add those files to git
 - Get example data using ```dvc get https://github.com/iterative/dataset-registry tutorial/ver/data.zip```
-  - This will download some example data (cat/dog pics)
-  - extract them into data folder
+  - This will download some example data (1800 cat/dog pics)
+  - extract them into `data` folder and delete downloaded zip file
 - Add the data folder using DVC instead of git `dvc add data`
-  - Follow the instruction to add the dvc metadata to git using `git add data.dvc .gitignore`
+  - Follow the instruction (of dvc add data) to add the dvc metadata to git using `git add data.dvc .gitignore`
     - This prevents git from tracking the raw data but only the "references" managed by DVC
 - A small test script was added `dvc_python_test/train.py` to test the dataset (i.e. count the elements to indicate the change of size in the raw data)
+- Add additional raw data using
+  - `dvc get https://github.com/iterative/dataset-registry 
+          tutorial/ver/new-labels.zip`
+  - Running `dvc status` will show you that the `data` folder was modified.
+    - Running `dvc_python_test/train.py` will now also output 2800 elements instead of 1800
+  - Running `dvc add data` again will add the additional raw data and update the DVC internal metadata
+    - Another `git status` will indicate that by showing that only `data.dvc` was modified

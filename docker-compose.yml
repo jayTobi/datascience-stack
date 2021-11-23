@@ -27,7 +27,8 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - mlflow-data:/opt/mlflow
+      #- mlflow-data:/opt/mlflow
+      - /opt/mlflow:/opt/mlflow
     ports:
       - 5000:5000
     depends_on:

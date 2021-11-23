@@ -158,14 +158,17 @@ For using a remote tracking server you have to configure:
 - Set the remote tracking url - using the API or **environment variables if you run multi-step workflows!**
 - Use a drive/storage that is accessible under the same name inside the remote server and the machine your running your experiment
   - Normally this would be some kind of cloud storage (e.g. AWS S3) or a shared network folder
-  - For the local docker example inside this repo a simple symbolic link will suffice
-    - Find the location where Docker stores the data inside the Docker volume with
+  - For the local docker example there are two ways
+    - Either use a Docker volume (line 30 in docker-compose.yml) and create a symbolic link (this causes permission issues in some cases)
+      - Find the location where Docker stores the data inside the Docker volume with
       - `docker volume ls`: list all volumes. Look for the one ending with `mlflow-data` and inspect it using
       - ` docker volume inspect datascience-stack_mlflow-data`: The JSON output of this command contains the required key "Mountpoint". Copy its value and create a symbolic link
       - `sudo ln -s /var/lib/docker/volumes/datascience-stack_mlflow-data/_data/artifactStore/ /opt/mlflow/artifactStore`: Make sure to use the same folder name inside the docker and the host.
         In the Dockerfile we specified it as `/opt/mlflow/artifactStore`
+    - Or use a direct mount (line 31 in docker-compose.yml)
+      - just ensure the folder exists, you have permissions and that it has the same name, i.e. `/opt/mlflow` (sub-folders will be created automatically)
 
-After mounting the folder you can simply run `mlflow/simple.py` then open up the MLFlow UI and you should find a new experiment `my-simple-experiment` with some metrics. After clicking on a run you can find more details and you **should ensure** that the artifacts were saved correctly by scrolling down the page and click on `test.txt` under the Artifacts section.
+After mounting the folder you can simply run `mlflow/simple.py` then open up the MLFlow UI and you should find a new experiment `my-simple-experiment` with some metrics. After clicking on a run you can find more details and you **should ensure** that the artifacts were saved correctly by scrolling down the page and click on `test.txt` under the Artifacts section. If it is empty you most probably run into permission errors and couldn't save the file.
 
 ### MLFlow basics and concepts
 

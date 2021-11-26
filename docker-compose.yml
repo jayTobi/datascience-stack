@@ -2,7 +2,7 @@ version: '3.8'
 services:
   mlflowdatabase:
     image: postgres:13.2
-    restart: always
+    restart: on-failure
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
@@ -15,7 +15,7 @@ services:
       - elastic    
   adminer:
     image: adminer
-    restart: always
+    restart: on-failure
     ports:
       - 8080:8080
     networks:

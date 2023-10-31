@@ -1,9 +1,10 @@
+#%%
 import os
 import mlflow
 from random import random, randint
 from mlflow import log_metric, log_param, log_artifacts
 
-
+#%%
 # only thing that is needed for simple experiments, i.e. none 
 mlflow.set_tracking_uri("http://localhost:5000")
 mlflow.set_experiment("my-simple-experiment")
@@ -26,3 +27,5 @@ if __name__ == "__main__":
     log_artifacts("outputs")
 
 
+
+# %%

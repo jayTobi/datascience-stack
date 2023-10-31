@@ -1,12 +1,13 @@
 version: '3.8'
 services:
   mlflowdatabase:
-    image: postgres:13.2
+    container_name: mlflowdatabase
+    image: postgres:16.0-alpine3.18
     restart: on-failure
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - 5432:5432    
     environment:
       - POSTGRES_USER=mlflow-postgres
       - POSTGRES_PASSWORD=mlflow-postgres
@@ -14,7 +15,7 @@ services:
     networks:
       - elastic    
   adminer:
-    image: adminer
+    image: adminer:4.8.1-standalone
     restart: on-failure
     ports:
       - 8080:8080
@@ -27,43 +28,48 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      #- mlflow-data:/opt/mlflow
-      - /opt/mlflow:/opt/mlflow
+      - mlflow-data:/opt/mlflow      
     ports:
       - 5000:5000
     depends_on:
       - mlflowdatabase
     networks:
       - elastic
-      
-  es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
-    container_name: es01
+  
+  opensearch-node1:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: opensearch-node1
     environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=es01
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node1
+      - discovery.seed_hosts=opensearch-node1
+      - cluster.initial_cluster_manager_nodes=opensearch-node1
+      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
-        soft: -1
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
         hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
     volumes:
-      - data01:/usr/share/elasticsearch/data
+      - data01:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
     ports:
       - 9200:9200
+      - 9600:9600
     networks:
       - elastic
 
-  kib01:
-    image: docker.elastic.co/kibana/kibana:7.10.2
-    container_name: kib01
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.11.0
+    container_name: opensearch-dashboards
     ports:
-      - 5601:5601
+      - 5601:5601 
+    expose:
+      - "5601"
     environment:
-      ELASTICSEARCH_URL: http://es01:9200
-      ELASTICSEARCH_HOSTS: http://es01:9200
+      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200"]' 
     networks:
       - elastic
 

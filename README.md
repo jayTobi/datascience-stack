@@ -1,4 +1,4 @@
-# Data Science Stack using MLFlow, DVC and ELK
+# Data Science Stack using MLFlow, DVC and OpenSearch
 
 ## Overview
 
@@ -9,10 +9,10 @@ possible. This includes:
 
 - MLFLow for the ML lifecycle, e.g. tracking metrics
 - DVC for managing and versioning data
-- ELK for managing logs and providing a UI for searching
+- OpenSearch for managing logs and providing a UI for analysing logs
 
 To combine everything into an easily executable environment we will
-use Docker to manage the different components.
+use Docker Compose to manage the different components.
 
 ## Prerequisite
 
@@ -31,23 +31,28 @@ containing the `docker-compose.yml` and run the following command:
 `docker-compose up -d`
 (-d runs the containers in detach mode and is optional)
 
-## ELK / EFK stack (Elasticsearch Logstash/Fluentd Kibana)
+## OpenSearch
 
-The Elastic Stack provides different products for log management and analysis.
-It's only one possibility but has a broad adoption currently so we use it here
-exemplary.
-Product details can be found here: <https://www.elastic.co/>
+OpenSearch (<https://opensearch.org>) is now used as a replacement of the elastic stack (ELK: elastic search, logstash, kibana) for log aggregation and analysis. 
 
 The `docker-compose.yml` inside this repo includes everything to run the stack.
 
-A more detailed guide for setting up the ELK stack using docker can be found here <https://www.elastic.co/guide/en/elastic-stack-get-started/current/get-started-docker.html>.
+A more detailed guide for setting up the OpenSearch using docker and/or Docker Compose can be found here <https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/>.
 
-After everything started successfully you can access Kibana using a web browser and the URL <http://localhost:5601>
+After everything started successfully you can access the UI using a web browser and the URL <http://localhost:5601>
+using user and password "admin".
 
-If the environment can not be started, e.g. Kibana can not connect to elastic search - look inside the logs for the elasticsearch container.
+### Problems with start up
 
-You might find something like "max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]" if so check your OS documentation on how to change this.
-(A solution can also be found here <https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html>)
+If the following error is displayed during the start of opensearch 
+``` max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]```
+
+You need to increase the value:
+1. On Linux 
+   1. sysctl -w vm.max_map_count=262144
+2. On Windows
+   1. wsl -d docker-desktop  
+   2. sysctl -w vm.max_map_count=262144
 
 ## Python logging
 
@@ -60,10 +65,9 @@ Details on the Python config can be found here <https://docs.python.org/3/howto/
 
 If you get a "KeyError: 'formatters'" your configuration can not be found by Python (it is searching in the current working directory (os.getcwd()) - check your path and try again.
 
-## fluentd and ElasticSearch (EFK stack)
+## fluentd and OpenSearch on Linux (to be updated)
 
-To send our logging output to ElasticSearch we use fluentd <https://docs.fluentd.org/>.
-(Another possibility would be using FileBeat "belonging" to the ELK stack).
+To send our logging output to OpenSearch we use fluentd <https://docs.fluentd.org/>.
 
 For installing fluentd follow the appropriate guide on <https://docs.fluentd.org/installation>.
 
@@ -80,7 +84,7 @@ Open the file `/etc/td-agent/td-agent.conf` and replace the content, probably ma
 </source>
 
 <match ds.**>
-  @type elasticsearch
+  @type opensearch
   host 127.0.0.1
   port 9200
   logstash_format true
@@ -103,13 +107,13 @@ For (re-)starting and status of the service use
 You can check the output of the fluentd agent by inspecting the following file, e.g. using
 `tail -f /var/log/td-agent/td-agent.log`
 
-If the start and connection to Elasticsearch (ES) is successful you should see something like
+If the start and connection to OpenSearch is successful you should see something like
 
 ```
 GET http://127.0.0.1:9200/ [status:200, request:0.002s, query:n/a]
 ```
 
-Later you can also verify that the LOG messages from your Python code are send to ES by looking for lines like:
+Later you can also verify that the LOG messages from your Python code are send to OpenSearch by looking for lines like:
 
 ```
 POST http://127.0.0.1:9200/_bulk [status:200, request:0.304s, query:0.298s]
@@ -117,7 +121,12 @@ POST http://127.0.0.1:9200/_bulk [status:200, request:0.304s, query:0.298s]
 
 These are triggered periodically depending on the configured flush_interval above.
 
-### Using fluentd and Python logging
+
+## Fluentd and Windows
+
+For instructions how to install fluentd on Windows see <https://docs.fluentd.org/installation/install-by-msi>
+
+## Using fluentd and Python logging
 
 Here we show 2 different versions of the logging configuration.
 
@@ -129,7 +138,7 @@ You can just run the Python scripts and check the fluentd log and the Kibana Web
 
 ## MLFlow
 
-MLFlow will be used as a server and a client the first part will focus on the server.
+MLFlow will be used as a server and client for managing models, experiments, recipes/pipelines.
 
 ### MLFlow Tracking Server
 
@@ -142,7 +151,7 @@ could work with the same server to share models or simplify tracking.
 
 In addition to PostgreSQL the docker installs `adminer` a PHP UI to connect to the database.
 
-You can open it using <http://localhost:8080> and connect to the database running inside the docker container using the server `mlflowdatabase:5432`, database `mlflow-postgres` and user/password from the `docker-compose.yml`.
+You can open it using <http://localhost:8080> and connect to the database running inside the docker container using the server `mlflowdatabase:5432`, database `mlflow` and user/password (mlflow-postgres/mlflow-postgres) from the `docker-compose.yml` file.
 
 ### MLFLow UI
 
@@ -156,10 +165,12 @@ The folder `mlflow` contains examples using MLFlow client APIs to connect and co
 For using a remote tracking server you have to configure:
 
 - Set the remote tracking url - using the API or **environment variables if you run multi-step workflows!**
-- Use a drive/storage that is accessible under the same name inside the remote server and the machine your running your experiment
+-  Use a drive/storage that is accessible under the same name inside the remote server and the machine your running your experiment
   - Normally this would be some kind of cloud storage (e.g. AWS S3) or a shared network folder
-  - For the local docker example there are two ways
-    - Either use a Docker volume (line 30 in docker-compose.yml) and create a symbolic link (this causes permission issues in some cases)
+  - For the local docker example there are two ways with direct file system access or better the first option
+    - Use remote artifact proxy (this is configured in the current version of the compose and Dockerfile) see
+      - <https://mlflow.org/docs/latest/tracking.html#scenario-5-mlflow-tracking-server-enabled-with-proxied-artifact-storage-access>
+    - Use a Docker volume (line 30 in docker-compose.yml) and create a symbolic link (this causes permission issues in some cases)
       - Find the location where Docker stores the data inside the Docker volume with
       - `docker volume ls`: list all volumes. Look for the one ending with `mlflow-data` and inspect it using
       - ` docker volume inspect datascience-stack_mlflow-data`: The JSON output of this command contains the required key "Mountpoint". Copy its value and create a symbolic link
@@ -177,7 +188,7 @@ To get a better understanding of the underlying ideas and terminology of MLFLow 
 - <https://www.mlflow.org/docs/latest/quickstart.html>
 - <https://www.mlflow.org/docs/latest/concepts.html>
 
-## DVC - Data Version Control
+## DVC - Data Version Control (to be updated)
 
 > Data Version Control, or DVC, is a data and ML experiment management tool that takes advantage of the existing engineering toolset that you're already familiar with (Git, CI/CD, etc.).
 > -- <cite><https://dvc.org/doc></cite>
